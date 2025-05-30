@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHS Structured Triage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        
+        .nav { background: #005eb8; color: white; padding: 15px 0; }
+        .nav-content { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #005eb8; margin-bottom: 10px; }
+        .header p { color: #666; }
+        
+        .progress { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .progress-steps { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .progress-step { text-align: center; flex: 1; }
+        .step-number { display: inline-block; width: 40px; height: 40px; border-radius: 50%; background: #ddd; color: #666; line-height: 40px; font-weight: bold; margin-bottom: 8px; }
+        .step-number.active { background: #005eb8; color: white; }
+        .step-number.complete { background: #28a745; color: white; }
+        .step-label { font-size: 0.9rem; color: #666; }
+        .progress-bar { height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #005eb8, #28a745); transition: width 0.5s; }
+        
+        .step { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
+        .step.active { display: block; }
+        .step h2 { color: #005eb8; margin-bottom: 20px; }
+        .step p { color: #666; margin-bottom: 25px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: bold; margin-bottom: 8px; color: #005eb8; }
+        .form-group input, .form-group select, .form-group textarea { padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #005eb8; outline: none; }
+        
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; cursor: pointer; }
+        .checkbox-item:hover { background: #f8f9fa; }
+        .checkbox-item input { width: 18px; height: 18px; }
+        
+        .symptom-categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .category-card { background: white; border: 2px solid #ddd; border-radius: 12px; padding: 25px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .category-card:hover { border-color: #005eb8; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .category-card.selected { border-color: #005eb8; background: #f0f8ff; }
+        .category-card.selected::after { content: "✓"; position: absolute; top: 15px; right: 15px; background: #28a745; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .category-icon { font-size: 3rem; text-align: center; margin-bottom: 15px; }
+        .category-title { font-size: 1.3rem; font-weight: bold; color: #005eb8; margin-bottom: 15px; text-align: center; }
+        .category-symptoms { display: flex; flex-wrap: wrap; gap: 8px; }
+        .symptom-tag { background: #f1f3f4; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; color: #666; }
+        
+        .symptom-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .symptom-option { display: flex; align-items: center; gap: 12px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .symptom-option:hover { border-color: #005eb8; background: #f8f9fa; }
+        .symptom-option input { width: 18px; height: 18px; }
+        
+        .severity-scale { margin: 20px 0; }
+        .severity-slider { width: 100%; height: 8px; border-radius: 4px; background: #ddd; outline: none; margin: 15px 0; }
+        .severity-labels { display: flex; justify-content: space-between; font-size: 0.9rem; color: #666; }
+        .severity-value { text-align: center; font-weight: bold; color: #005eb8; margin: 10px 0; }
+        
+        .assessment-result { display: none; }
+        .assessment-result.show { display: block; }
+        .urgency-indicator { text-align: center; padding: 20px; border-radius: 8px; margin-bottom: 25px; font-weight: bold; font-size: 1.2rem; }
+        .urgency-emergency { background: #ffebee; border: 2px solid #f44336; color: #c62828; }
+        .urgency-urgent { background: #fff3e0; border: 2px solid #ff9800; color: #ef6c00; }
+        .urgency-standard { background: #e3f2fd; border: 2px solid #2196f3; color: #1565c0; }
+        .urgency-self-care { background: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; }
+        
+        .assessment-content { background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; line-height: 1.6; }
+        .assessment-content h4 { color: #005eb8; margin: 20px 0 10px 0; }
+        .assessment-content strong { color: #005eb8; }
+        
+        .loading { text-align: center; padding: 40px; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #ddd; border-top-color: #005eb8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .step-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.2s; }
+        .btn-primary { background: #005eb8; color: white; }
+        .btn-primary:hover { background: #004494; transform: translateY(-1px); }
+        .btn-secondary { background: #f8f9fa; color: #005eb8; border: 2px solid #005eb8; }
+        .btn-secondary:hover { background: #005eb8; color: white; }
+        .btn:disabled { background: #ccc; color: #666; cursor: not-allowed; transform: none; }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            .nav-content { flex-direction: column; gap: 15px; }
+            .progress-steps { gap: 10px; }
+            .step-label { font-size: 0.8rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .symptom-categories { grid-template-columns: 1fr; }
+            .step-actions { flex-direction: column; gap: 15px; }
+            .step-actions .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-logo">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; color: #005eb8;">NHS</div>
+                    <span>Digital Triage</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat">💬 Chat</a>
+                <a href="/triage">📋 Triage</a>
+                <a href="/staff-dashboard">👨‍⚕️ Staff</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📋 Structured Medical Triage</h1>
+            <p>Complete a comprehensive assessment with step-by-step guidance</p>
+        </div>
+        
+        <div class="progress">
+            <div class="progress-steps">
+                <div class="progress-step">
+                    <div class="step-number active" id="step-num-1">1</div>
+                    <div class="step-label">Personal Info</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number" id="step-num-2">2</div>
+                    <div class="step-label">Select Symptoms</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number" id="step-num-3">3</div>
+                    <div class="step-label">Details</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-number" id="step-num-4">4</div>
+                    <div class="step-label">Assessment</div>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 25%"></div>
+            </div>
+        </div>
+        
+        <!-- Step 1: Personal Information -->
+        <div class="step active" id="step-1">
+            <h2>👤 Personal Information</h2>
+            <p>Please provide your basic information to help us give you personalized medical guidance.</p>
+            
+            <form id="personal-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age *</label>
+                        <select id="age" name="age" required>
+                            <option value="">Select age</option>
+                            {% for age_val in range(1, 101) %}
+                            <option value="{{ age_val }}">{{ age_val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                            <option value="prefer-not-to-say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="postcode">Postcode</label>
+                        <input type="text" id="postcode" name="postcode" placeholder="SW1A 1AA">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="07123 456789">
+                    </div>
+                </div>
+                
+                <h3 style="color: #005eb8; margin: 30px 0 20px 0;">🏥 Medical Information</h3>
+                
+                <div class="form-group">
+                    <label>Existing Medical Conditions</label>
+                    <div class="checkbox-grid">
+                        {% for condition in medical_conditions %}
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="existingConditions" value="{{ condition }}">
+                            {{ condition }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="medications">Current Medications</label>
+                        <textarea id="medications" name="medications" rows="3" placeholder="List medications (optional)"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="allergies">Known Allergies</label>
+                        <textarea id="allergies" name="allergies" rows="3" placeholder="List allergies (optional)"></textarea>
+                    </div>
+                </div>
+                
+                <div class="step-actions">
+                    <div></div>
+                    <button type="submit" class="btn btn-primary">Continue to Symptoms →</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Step 2: Symptom Categories -->
+        <div class="step" id="step-2">
+            <h2>🩺 What's Your Main Concern?</h2>
+            <p>Select the category that best describes your primary symptom or health concern.</p>
+            
+            <div class="symptom-categories">
+                {% for category_id, category in symptom_categories.items() %}
+                <div class="category-card" data-category="{{ category_id }}">
+                    <div class="category-icon">{{ category.icon }}</div>
+                    <div class="category-title">{{ category.name }}</div>
+                    <div class="category-symptoms">
+                        {% for symptom in category.symptoms[:4] %}
+                        <span class="symptom-tag">{{ symptom }}</span>
+                        {% endfor %}
+                        {% if category.symptoms|length > 4 %}
+                        <span class="symptom-tag">+{{ category.symptoms|length - 4 }} more</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="step-actions">
+                <button type="button" class="btn btn-secondary" onclick="previousStep()">← Back</button>
+                <div></div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Detailed Symptoms -->
+        <div class="step" id="step-3">
+            <h2>🔍 Tell Us More About Your Symptoms</h2>
+            <p>Please provide specific details about your symptoms to help us give you the best guidance.</p>
+            
+            <form id="symptom-form">
+                <div class="form-group">
+                    <label>Which specific symptom is bothering you most? *</label>
+                    <div class="symptom-options" id="symptom-options">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>How severe is your symptom? (1 = mild, 10 = severe) *</label>
+                    <div class="severity-scale">
+                        <input type="range" id="severity" name="severity" min="1" max="10" value="5" class="severity-slider" required>
+                        <div class="severity-value" id="severity-value">5 - Moderate</div>
+                        <div class="severity-labels">
+                            <span>1 - Mild</span>
+                            <span>10 - Severe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration">How long have you had these symptoms? *</label>
+                    <select id="duration" name="duration" required>
+                        <option value="">Select duration</option>
+                        <option value="less-than-hour">Less than 1 hour</option>
+                        <option value="few-hours">A few hours</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Since yesterday</option>
+                        <option value="few-days">A few days</option>
+                        <option value="week">About a week</option>
+                        <option value="weeks">Several weeks</option>
+                        <option value="month-plus">More than a month</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Any additional symptoms? (Select all that apply)</label>
+                    <div class="symptom-options" id="additional-symptoms">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="previousStep()">← Back</button>
+                    <button type="submit" class="btn btn-primary">Get AI Assessment 🤖</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Step 4: AI Assessment -->
+        <div class="step" id="step-4">
+            <h2>🤖 AI Medical Assessment</h2>
+            <p>Our AI system is analyzing your symptoms and medical history...</p>
+            
+            <div class="loading" id="assessment-loading">
+                <div class="spinner"></div>
+                <div>Analyzing your symptoms and generating personalized recommendations...</div>
+            </div>
+            
+            <div class="assessment-result" id="assessment-result">
+                <div class="urgency-indicator" id="urgency-indicator">
+                    <!-- Urgency level will be displayed here -->
+                </div>
+                
+                <div class="assessment-content" id="assessment-content">
+                    <!-- AI assessment will be displayed here -->
+                </div>
+                
+                <div style="background: #fff3cd; border: 2px solid #ff9800; padding: 20px; border-radius: 8px; text-align: center;">
+                    <h4 style="color: #e65100; margin-bottom: 15px;">📞 Important Contact Information</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: #ffebee; padding: 15px; border-radius: 8px; border: 2px solid #f44336;">
+                            <strong>🚨 Emergency (999)</strong><br>
+                            <small>Life-threatening situations</small>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 2px solid #4caf50;">
+                            <strong>📞 NHS 111</strong><br>
+                            <small>Urgent medical advice</small>
+                        </div>
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border: 2px solid #2196f3;">
+                            <strong>🏥 Your GP</strong><br>
+                            <small>Book an appointment</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button type="button" class="btn btn-secondary" onclick="location.href='/triage'">🔄 New Assessment</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Print Results</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const sessionId = "{{ session_id }}";
+        const ollamaAvailable = {{ 'true' if ollama_available else 'false' }};
+        const symptomCategories = {{ symptom_categories|tojson }};
+        
+        let currentStep = 1;
+        let patientData = {};
+        let selectedCategory = null;
+        let assessmentId = null;
+        
+        // Initialize
+        if (!ollamaAvailable) {
+            alert('AI service is currently unavailable. Please try again later or contact NHS 111.');
+        }
+        
+        // Form submissions
+        document.getElementById('personal-form').addEventListener('submit', handlePersonalInfo);
+        document.getElementById('symptom-form').addEventListener('submit', handleSymptomSubmit);
+        
+        // Severity slider
+        document.getElementById('severity').addEventListener('input', function(e) {
+            const value = e.target.value;
+            const labels = ['', 'Mild', 'Mild', 'Mild-Moderate', 'Moderate', 'Moderate', 'Moderate-Severe', 'Severe', 'Severe', 'Very Severe', 'Extremely Severe'];
+            document.getElementById('severity-value').textContent = `${value} - ${labels[value]}`;
+        });
+        
+        // Category selection
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedCategory = this.dataset.category;
+                populateSymptomOptions();
+                setTimeout(() => nextStep(), 800);
+            });
+        });
+        
+        async function handlePersonalInfo(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            patientData = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                age: parseInt(formData.get('age')),
+                gender: formData.get('gender'),
+                postcode: formData.get('postcode'),
+                phone: formData.get('phone'),
+                existingConditions: formData.getAll('existingConditions'),
+                currentMedications: formData.get('medications') ? formData.get('medications').split(',').map(m => m.trim()).filter(m => m) : [],
+                allergies: formData.get('allergies') ? formData.get('allergies').split(',').map(a => a.trim()).filter(a => a) : []
+            };
+            
+            try {
+                const response = await fetch('/api/patient/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patientData)
+                });
+                
+                if (response.ok) {
+                    nextStep();
+                } else {
+                    alert('Failed to save information. Please try again.');
+                }
+            } catch (error) {
+                alert('Connection error. Please try again.');
+            }
+        }
+        
+        function populateSymptomOptions() {
+            if (!selectedCategory) return;
+            
+            const category = symptomCategories[selectedCategory];
+            const symptomsContainer = document.getElementById('symptom-options');
+            const additionalContainer = document.getElementById('additional-symptoms');
+            
+            symptomsContainer.innerHTML = '';
+            additionalContainer.innerHTML = '';
+            
+            // Primary symptoms (radio)
+            category.symptoms.forEach(symptom => {
+                const div = document.createElement('div');
+                div.className = 'symptom-option';
+                div.innerHTML = `
+                    <input type="radio" name="primarySymptom" value="${symptom}" id="primary-${symptom}" required>
+                    <label for="primary-${symptom}">${symptom}</label>
+                `;
+                symptomsContainer.appendChild(div);
+            });
+            
+            // Additional symptoms (checkbox)
+            category.symptoms.forEach(symptom => {
+                const div = document.createElement('div');
+                div.className = 'symptom-option';
+                div.innerHTML = `
+                    <input type="checkbox" name="additionalSymptoms" value="${symptom}" id="additional-${symptom}">
+                    <label for="additional-${symptom}">${symptom}</label>
+                `;
+                additionalContainer.appendChild(div);
+            });
+        }
+        
+        async function handleSymptomSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const symptomData = {
+                category: selectedCategory,
+                primarySymptom: formData.get('primarySymptom'),
+                severity: parseInt(formData.get('severity')),
+                duration: formData.get('duration'),
+                additionalSymptoms: formData.getAll('additionalSymptoms')
+            };
+            
+            try {
+                const response = await fetch('/api/triage/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(symptomData)
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    assessmentId = data.assessment_id;
+                    nextStep();
+                    startAssessment();
+                } else {
+                    alert('Failed to submit symptoms. Please try again.');
+                }
+            } catch (error) {
+                alert('Connection error. Please try again.');
+            }
+        }
+        
+        function startAssessment() {
+            document.getElementById('assessment-loading').style.display = 'block';
+            document.getElementById('assessment-result').classList.remove('show');
+            
+            const eventSource = new EventSource(`/api/triage/stream/${assessmentId}`);
+            let fullResponse = '';
+            
+            eventSource.onmessage = function(event) {
+                if (event.data === '[DONE]') {
+                    eventSource.close();
+                    displayAssessment(fullResponse);
+                    return;
+                }
+                
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.chunk) {
+                        fullResponse += data.chunk;
+                    }
+                    if (data.done) {
+                        eventSource.close();
+                        displayAssessment(fullResponse);
+                    }
+                } catch (e) {
+                    console.error('Parse error:', e);
+                }
+            };
+            
+            eventSource.onerror = function() {
+                eventSource.close();
+                document.getElementById('assessment-loading').style.display = 'none';
+                alert('Assessment failed. Please try again or contact NHS 111.');
+            };
+        }
+        
+        function displayAssessment(response) {
+            document.getElementById('assessment-loading').style.display = 'none';
+            
+            // Parse urgency
+            const urgency = parseUrgency(response);
+            displayUrgency(urgency);
+            
+            // Display content
+            document.getElementById('assessment-content').innerHTML = formatResponse(response);
+            document.getElementById('assessment-result').classList.add('show');
+            
+            // Save result
+            fetch(`/api/triage/save/${assessmentId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response: response })
+            });
+        }
+        
+        function parseUrgency(response) {
+            const text = response.toLowerCase();
+            if (text.includes('emergency') || text.includes('999')) return 'emergency';
+            if (text.includes('urgent') || text.includes('111')) return 'urgent';
+            if (text.includes('gp') || text.includes('doctor')) return 'standard';
+            return 'self-care';
+        }
+        
+        function displayUrgency(urgency) {
+            const indicator = document.getElementById('urgency-indicator');
+            const config = {
+                'emergency': { text: '🚨 Emergency - Call 999', class: 'urgency-emergency' },
+                'urgent': { text: '⚡ Urgent - Call NHS 111', class: 'urgency-urgent' },
+                'standard': { text: '🏥 See your GP', class: 'urgency-standard' },
+                'self-care': { text: '💚 Self-care advised', class: 'urgency-self-care' }
+            };
+            
+            const c = config[urgency] || config['standard'];
+            indicator.textContent = c.text;
+            indicator.className = `urgency-indicator ${c.class}`;
+        }
+        
+        function formatResponse(response) {
+            return response
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/^/, '<p>') + '</p>';
+        }
+        
+        function nextStep() {
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            document.getElementById(`step-num-${currentStep}`).classList.add('complete');
+            document.getElementById(`step-num-${currentStep}`).classList.remove('active');
+            
+            currentStep++;
+            
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.getElementById(`step-num-${currentStep}`).classList.add('active');
+            
+            updateProgress();
+        }
+        
+        function previousStep() {
+            if (currentStep <= 1) return;
+            
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            document.getElementById(`step-num-${currentStep}`).classList.remove('active');
+            
+            currentStep--;
+            
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.getElementById(`step-num-${currentStep}`).classList.remove('complete');
+            document.getElementById(`step-num-${currentStep}`).classList.add('active');
+            
+            updateProgress();
+        }
+        
+        function updateProgress() {
+            const progressPercent = (currentStep / 4) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+        }
+    </script>
+</body>
+</html>

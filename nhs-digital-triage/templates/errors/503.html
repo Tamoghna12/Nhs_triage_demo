@@ -1,0 +1,55 @@
+<!-- templates/errors/503.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Unavailable - NHS Digital Triage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .error-container { text-align: center; max-width: 500px; padding: 40px; }
+        .error-icon { font-size: 6rem; margin-bottom: 20px; color: #ff9800; }
+        .error-title { color: #ff9800; font-size: 2.5rem; margin-bottom: 15px; }
+        .error-message { color: #666; font-size: 1.2rem; margin-bottom: 30px; line-height: 1.6; }
+        .error-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+        .btn-primary { background: #005eb8; color: white; }
+        .btn-primary:hover { background: #004494; transform: translateY(-1px); }
+        .btn-secondary { background: #f8f9fa; color: #005eb8; border: 2px solid #005eb8; }
+        .btn-secondary:hover { background: #005eb8; color: white; }
+        .status-box { margin-top: 30px; padding: 20px; background: white; border: 2px solid #ddd; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🔧</div>
+        <h1 class="error-title">Service Temporarily Unavailable</h1>
+        <p class="error-message">
+            Our AI assessment service is currently unavailable. This may be due to maintenance or high demand.
+            Please try again in a few minutes, or contact NHS services directly.
+        </p>
+        <div class="error-actions">
+            <a href="javascript:location.reload()" class="btn btn-primary">🔄 Retry</a>
+            <a href="/" class="btn btn-secondary">🏠 Home</a>
+        </div>
+        <div class="status-box">
+            <strong style="color: #005eb8;">📞 Alternative Options</strong><br>
+            <div style="margin-top: 15px; text-align: left; color: #666;">
+                <div style="margin-bottom: 10px;">
+                    <strong>NHS 111 Online:</strong> nhs.uk/111
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>NHS 111 Phone:</strong> Call 111
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>Your GP:</strong> Book appointment online
+                </div>
+                <div style="background: #ffebee; padding: 10px; border-radius: 4px; border-left: 4px solid #f44336;">
+                    <strong>Emergency:</strong> Call 999 for life-threatening situations
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

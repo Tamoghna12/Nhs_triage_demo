@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHS Chat Assistant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; height: 100vh; display: flex; flex-direction: column; }
+        
+        .nav { background: #005eb8; color: white; padding: 15px 0; }
+        .nav-content { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); }
+        
+        .chat-container { flex: 1; max-width: 800px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; }
+        .chat-header { text-align: center; margin-bottom: 20px; }
+        .chat-header h1 { color: #005eb8; margin-bottom: 10px; }
+        .chat-header p { color: #666; }
+        
+        .chat-messages { flex: 1; background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; overflow-y: auto; min-height: 400px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .message { margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px; }
+        .message.user { flex-direction: row-reverse; }
+        .message-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        .message.user .message-avatar { background: #005eb8; }
+        .message.assistant .message-avatar { background: #28a745; }
+        .message-content { max-width: 70%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; }
+        .message.user .message-content { background: #005eb8; color: white; border-bottom-right-radius: 4px; }
+        .message.assistant .message-content { background: #f1f3f4; color: #333; border-bottom-left-radius: 4px; }
+        .message-time { font-size: 0.8rem; color: #666; margin-top: 5px; }
+        
+        .typing-indicator { display: none; align-items: center; gap: 8px; color: #666; font-style: italic; }
+        .typing-dots { display: flex; gap: 4px; }
+        .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: #666; animation: pulse 1.4s infinite ease-in-out; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes pulse { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 25px; font-size: 1rem; outline: none; }
+        .chat-input input:focus { border-color: #005eb8; }
+        .chat-input button { padding: 15px 25px; background: #005eb8; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .chat-input button:hover { background: #004494; }
+        .chat-input button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .disclaimer { background: #fff3cd; border: 2px solid #ff9800; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
+        .disclaimer strong { color: #e65100; }
+        
+        .quick-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .quick-option { background: white; border: 2px solid #005eb8; color: #005eb8; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .quick-option:hover { background: #005eb8; color: white; }
+        
+        @media (max-width: 768px) {
+            .nav-content { flex-direction: column; gap: 15px; }
+            .chat-container { padding: 10px; }
+            .message-content { max-width: 85%; }
+            .chat-input input { padding: 12px; }
+            .chat-input button { padding: 12px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-logo">🏥 NHS Digital Triage</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat">💬 Chat</a>
+                <a href="/triage">📋 Triage</a>
+                <a href="/staff-dashboard">👨‍⚕️ Staff</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>💬 NHS Chat Assistant</h1>
+            <p>Get instant medical guidance through natural conversation</p>
+        </div>
+        
+        <div class="disclaimer">
+            <strong>⚠️ Medical Disclaimer:</strong> This AI assistant provides general health information only. 
+            For emergencies, call 999. For urgent care, call NHS 111.
+        </div>
+        
+        <div class="quick-options" id="quick-options">
+            <div class="quick-option" onclick="sendQuickMessage('I have a headache')">I have a headache</div>
+            <div class="quick-option" onclick="sendQuickMessage('I feel unwell')">I feel unwell</div>
+            <div class="quick-option" onclick="sendQuickMessage('I have a cough')">I have a cough</div>
+            <div class="quick-option" onclick="sendQuickMessage('I need medical advice')">I need medical advice</div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="message assistant">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Hello! I'm your NHS Digital Assistant. How can I help you today? Please describe your symptoms or health concerns.
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-avatar" style="background: #28a745;">🤖</div>
+            <span>NHS Assistant is typing</span>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Type your message..." maxlength="500">
+            <button id="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        const sessionId = "{{ session_id }}";
+        const ollamaAvailable = {{ 'true' if ollama_available else 'false' }};
+        const messagesContainer = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        
+        // Initialize
+        if (!ollamaAvailable) {
+            alert('AI service is currently unavailable. Please try again later or contact NHS 111.');
+        }
+        
+        // Event listeners
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage();
+        }
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !ollamaAvailable) return;
+            
+            // Hide quick options after first message
+            document.getElementById('quick-options').style.display = 'none';
+            
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            sendButton.disabled = true;
+            
+            try {
+                // Start chat
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to send message');
+                }
+                
+                // Show typing indicator
+                typingIndicator.style.display = 'flex';
+                scrollToBottom();
+                
+                // Stream response
+                const eventSource = new EventSource(`/api/chat/stream/${data.message_id}`);
+                let assistantMessage = '';
+                let messageElement = null;
+                
+                eventSource.onmessage = function(event) {
+                    if (event.data === '[DONE]') {
+                        eventSource.close();
+                        typingIndicator.style.display = 'none';
+                        sendButton.disabled = false;
+                        messageInput.focus();
+                        return;
+                    }
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.chunk) {
+                            assistantMessage += data.chunk;
+                            
+                            if (!messageElement) {
+                                typingIndicator.style.display = 'none';
+                                messageElement = addMessage('', 'assistant');
+                            }
+                            
+                            updateMessageContent(messageElement, assistantMessage);
+                            scrollToBottom();
+                        }
+                        
+                        if (data.done) {
+                            eventSource.close();
+                            sendButton.disabled = false;
+                            messageInput.focus();
+                        }
+                    } catch (e) {
+                        console.error('Parse error:', e);
+                    }
+                };
+                
+                eventSource.onerror = function() {
+                    eventSource.close();
+                    typingIndicator.style.display = 'none';
+                    addMessage('Sorry, I encountered an error. Please try again or contact NHS 111 for assistance.', 'assistant');
+                    sendButton.disabled = false;
+                    messageInput.focus();
+                };
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I couldn\'t process your message. Please try again or contact NHS 111.', 'assistant');
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        function addMessage(content, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${role === 'user' ? '👤' : '🤖'}</div>
+                <div class="message-content">
+                    <div class="message-text">${formatMessage(content)}</div>
+                    <div class="message-time">${timeStr}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+            
+            return messageDiv;
+        }
+        
+        function updateMessageContent(messageElement, content) {
+            const textElement = messageElement.querySelector('.message-text');
+            textElement.innerHTML = formatMessage(content);
+        }
+        
+        function formatMessage(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+        
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Auto-focus input
+        messageInput.focus();
+    </script>
+</body>
+</html>

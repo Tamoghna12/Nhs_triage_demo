@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHS Digital Triage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 0; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #005eb8; font-size: 3rem; margin-bottom: 10px; }
+        .header p { color: #666; font-size: 1.3rem; }
+        
+        .nav { background: #005eb8; color: white; padding: 15px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .nav-content { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5rem; font-weight: bold; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; transition: background 0.2s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); }
+        .nav-links a.active { background: rgba(255,255,255,0.2); }
+        
+        .hero { text-align: center; background: white; padding: 40px; border-radius: 12px; margin-bottom: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .hero h2 { color: #005eb8; font-size: 2.5rem; margin-bottom: 15px; }
+        .hero p { color: #666; font-size: 1.2rem; margin-bottom: 30px; }
+        
+        .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .option { background: white; padding: 30px; border-radius: 12px; text-decoration: none; color: inherit; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.3s; border: 2px solid transparent; }
+        .option:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); border-color: #005eb8; }
+        .option-icon { font-size: 3.5rem; margin-bottom: 20px; text-align: center; }
+        .option h3 { color: #005eb8; margin-bottom: 15px; font-size: 1.5rem; }
+        .option p { color: #666; line-height: 1.6; margin-bottom: 15px; }
+        .option-features { list-style: none; }
+        .option-features li { color: #28a745; margin-bottom: 8px; font-size: 0.95rem; }
+        .option-features li:before { content: "✓ "; font-weight: bold; margin-right: 8px; }
+        
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 40px 0; }
+        .feature { background: white; padding: 25px; border-radius: 8px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .feature h4 { color: #005eb8; margin-bottom: 10px; }
+        .feature p { color: #666; font-size: 0.95rem; }
+        
+        .emergency { background: #fff3cd; border: 2px solid #ff9800; margin: 40px 0; padding: 25px; border-radius: 12px; }
+        .emergency h3 { color: #e65100; margin-bottom: 15px; text-align: center; font-size: 1.4rem; }
+        .emergency-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .emergency-item { padding: 20px; border-radius: 8px; text-align: center; }
+        .emergency-item.urgent { background: #ffebee; border: 2px solid #f44336; }
+        .emergency-item.moderate { background: #e8f5e9; border: 2px solid #4caf50; }
+        .emergency-item.standard { background: #e3f2fd; border: 2px solid #2196f3; }
+        .emergency-item strong { display: block; margin-bottom: 8px; font-size: 1.1rem; }
+        .emergency-item small { color: #666; font-size: 0.85rem; display: block; margin-top: 8px; }
+        
+        .staff-access { background: #005eb8; color: white; padding: 30px; border-radius: 12px; text-align: center; margin-top: 40px; }
+        .staff-access h3 { margin-bottom: 10px; }
+        .staff-access p { margin-bottom: 20px; opacity: 0.9; }
+        .staff-btn { background: white; color: #005eb8; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; transition: transform 0.2s; }
+        .staff-btn:hover { transform: translateY(-2px); }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .hero h2 { font-size: 2rem; }
+            .nav-content { flex-direction: column; gap: 15px; }
+            .nav-links { flex-wrap: wrap; justify-content: center; }
+            .options { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-logo">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: white; padding: 8px 12px; border-radius: 4px; font-weight: bold; color: #005eb8;">NHS</div>
+                    <span>Digital Triage</span>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat">💬 Chat</a>
+                <a href="/triage">📋 Triage</a>
+                <a href="/staff-dashboard">👨‍⚕️ Staff</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="hero">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                <div style="background: #005eb8; color: white; padding: 12px 16px; border-radius: 8px; font-weight: bold; font-size: 1.2rem;">NHS</div>
+                <h2 style="margin: 0; color: #005eb8;">AI-Powered Medical Assessment</h2>
+            </div>
+            <p>Get instant medical guidance through our intelligent triage system</p>
+        </div>
+        
+        <div class="options">
+            <a href="/chat" class="option">
+                <div class="option-icon">💬</div>
+                <h3>Chat Assistant</h3>
+                <p>Have a natural conversation with our AI medical assistant for quick guidance and advice.</p>
+                <ul class="option-features">
+                    <li>Instant responses</li>
+                    <li>Natural conversation</li>
+                    <li>Quick medical guidance</li>
+                    <li>24/7 availability</li>
+                </ul>
+            </a>
+            
+            <a href="/triage" class="option">
+                <div class="option-icon">📋</div>
+                <h3>Structured Triage</h3>
+                <p>Complete a comprehensive medical assessment with step-by-step questions and detailed analysis.</p>
+                <ul class="option-features">
+                    <li>Comprehensive assessment</li>
+                    <li>Step-by-step guidance</li>
+                    <li>Detailed medical report</li>
+                    <li>Urgency classification</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h4>Instant Assessment</h4>
+                <p>Get medical guidance in minutes with AI-powered analysis</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <h4>Advanced AI</h4>
+                <p>Powered by sophisticated language models trained on medical knowledge</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h4>Secure & Private</h4>
+                <p>Your medical information is protected and confidential</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <h4>Mobile Friendly</h4>
+                <p>Access from any device, anywhere, anytime</p>
+            </div>
+        </div>
+        
+        <div class="emergency">
+            <h3>⚠️ Emergency Information</h3>
+            <p>For medical emergencies, always call the appropriate service immediately</p>
+            <div class="emergency-grid">
+                <div class="emergency-item urgent">
+                    <strong>🚨 Life-threatening Emergency</strong>
+                    <p>Call <strong>999</strong> immediately</p>
+                    <small>Chest pain, difficulty breathing, severe bleeding, unconsciousness, severe allergic reactions</small>
+                </div>
+                <div class="emergency-item moderate">
+                    <strong>📞 Urgent Medical Advice</strong>
+                    <p>Call <strong>NHS 111</strong></p>
+                    <small>When you need help fast but it's not a 999 emergency</small>
+                </div>
+                <div class="emergency-item standard">
+                    <strong>🩺 Non-urgent Concerns</strong>
+                    <p>Use our <strong>Digital Triage</strong></p>
+                    <small>For symptom assessment and guidance to appropriate care</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="staff-access">
+            <h3>👨‍⚕️ Healthcare Professional?</h3>
+            <p>Access the staff dashboard to view patient assessments and system analytics</p>
+            <a href="/staff-dashboard" class="staff-btn">Access Staff Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

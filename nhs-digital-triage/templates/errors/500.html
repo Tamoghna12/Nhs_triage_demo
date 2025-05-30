@@ -1,0 +1,46 @@
+<!-- templates/errors/500.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Error - NHS Digital Triage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .error-container { text-align: center; max-width: 500px; padding: 40px; }
+        .error-icon { font-size: 6rem; margin-bottom: 20px; color: #dc3545; }
+        .error-title { color: #dc3545; font-size: 2.5rem; margin-bottom: 15px; }
+        .error-message { color: #666; font-size: 1.2rem; margin-bottom: 30px; line-height: 1.6; }
+        .error-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+        .btn-primary { background: #005eb8; color: white; }
+        .btn-primary:hover { background: #004494; transform: translateY(-1px); }
+        .btn-secondary { background: #f8f9fa; color: #005eb8; border: 2px solid #005eb8; }
+        .btn-secondary:hover { background: #005eb8; color: white; }
+        .emergency-box { margin-top: 30px; padding: 20px; background: #ffebee; border: 2px solid #f44336; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">System Error</h1>
+        <p class="error-message">
+            We're experiencing technical difficulties. Our team has been notified and is working to resolve the issue.
+            If you need immediate medical assistance, please contact emergency services.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">🏠 Try Again</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>
+        </div>
+        <div class="emergency-box">
+            <strong style="color: #c62828;">🚨 Emergency Contacts</strong><br>
+            <div style="margin-top: 10px; color: #666;">
+                <strong>999</strong> - Life-threatening emergencies<br>
+                <strong>111</strong> - Urgent medical advice<br>
+                <strong>Your GP</strong> - Non-urgent appointments
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!-- templates/errors/404.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - NHS Digital Triage</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .error-container { text-align: center; max-width: 500px; padding: 40px; }
+        .error-icon { font-size: 6rem; margin-bottom: 20px; color: #005eb8; }
+        .error-title { color: #005eb8; font-size: 2.5rem; margin-bottom: 15px; }
+        .error-message { color: #666; font-size: 1.2rem; margin-bottom: 30px; line-height: 1.6; }
+        .error-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.2s; }
+        .btn-primary { background: #005eb8; color: white; }
+        .btn-primary:hover { background: #004494; transform: translateY(-1px); }
+        .btn-secondary { background: #f8f9fa; color: #005eb8; border: 2px solid #005eb8; }
+        .btn-secondary:hover { background: #005eb8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🔍</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-message">
+            The page you're looking for doesn't exist or has been moved. 
+            If you need urgent medical assistance, please use one of the options below.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">🏠 Return Home</a>
+            <a href="/chat" class="btn btn-secondary">💬 Chat Assistant</a>
+            <a href="/triage" class="btn btn-secondary">📋 Triage</a>
+        </div>
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border: 2px solid #ff9800; border-radius: 8px;">
+            <strong style="color: #e65100;">⚠️ Emergency?</strong><br>
+            <span style="color: #666;">For life-threatening emergencies, call <strong>999</strong> immediately</span>
+        </div>
+    </div>
+</body>
+</html>
